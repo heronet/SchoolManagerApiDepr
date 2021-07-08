@@ -6,8 +6,10 @@ namespace SchoolManagerApi.Utils
     {
         public static class Roles
         {
-            public static readonly string Admin = "Admin";
-            public static readonly string Member = "Admin";
+            public const string Admin = "Admin";
+            public const string Student = "Student";
+            public const string Teacher = "Teacher";
+            public const string StoreKeeper = "StoreKeeper";
         }
     }
 }

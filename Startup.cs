@@ -27,6 +27,7 @@ namespace SchoolManagerApi
             services.AddControllers();
             services.AddCors();
             services.AddMyServices(_configuration);
+            services.AddAuthorizationServices(_configuration);
             services.AddScoped<TokenService>();
         }
 

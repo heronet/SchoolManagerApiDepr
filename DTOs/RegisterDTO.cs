@@ -5,6 +5,8 @@ namespace SchoolManagerApi.DTOs
     public class RegisterDTO
     {
         [Required]
+        public string Username { get; set; }
+        [Required]
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
@@ -14,5 +16,7 @@ namespace SchoolManagerApi.DTOs
         public string Phone { get; set; }
         [Required]
         public string Password { get; set; }
+        [Required]
+        public string Role { get; set; }
     }
 }

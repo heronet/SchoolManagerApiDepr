@@ -32,34 +32,29 @@ namespace SchoolManagerApi.Controllers
             _tokenService = tokenService;
         }
         [HttpPost("register")]
-        public async Task<ActionResult<UserAuthDTO>> RegisterAdmin(RegisterDTO registerDTO)
+        public async Task<ActionResult<UserAuthDTO>> Register(RegisterDTO registerDTO)
         {
-            var adminExists = await _roleManager.RoleExistsAsync(Constants.Roles.Admin);
-            if (!adminExists)
-            {
-                var role = new IdentityRole(Constants.Roles.Admin);
-                var roleResult = await _roleManager.CreateAsync(role);
-                if (!roleResult.Succeeded)
-                    return BadRequest(roleResult);
-            }
+            var role = await _roleManager.FindByNameAsync(registerDTO.Role);
+            if (role == null) return BadRequest("Invalid Role"); // Return if registerDTO.Role is unknown.
+
             var user = new EntityUser
             {
-                UserName = registerDTO.Email.ToLower().Trim(),
+                UserName = registerDTO.Username.ToLower().Trim(),
                 Email = registerDTO.Email.ToLower().Trim(),
                 PhoneNumber = registerDTO.Phone,
-                FirstName = registerDTO.FirstName,
-                LastName = registerDTO.LastName
+                FirstName = registerDTO.FirstName.Trim(),
+                LastName = registerDTO.LastName.Trim()
             };
             var result = await _userManager.CreateAsync(user, password: registerDTO.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            var addToRoleResult = await _userManager.AddToRoleAsync(user, Constants.Roles.Admin);
+            var addToRoleResult = await _userManager.AddToRoleAsync(user, registerDTO.Role);
             if (addToRoleResult.Succeeded)
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 return await UserToDto(user, roles.ToList());
             }
-            return BadRequest("Can't add Admin");
+            return BadRequest("Can't add User");
         }
         private async Task<UserAuthDTO> UserToDto(EntityUser user, List<string> roles)
         {
@@ -68,7 +63,6 @@ namespace SchoolManagerApi.Controllers
                 Username = user.UserName,
                 Token = await _tokenService.GenerateToken(user),
                 Id = user.Id,
-                Email = user.Email,
                 Roles = roles
             };
         }
