@@ -17,6 +17,10 @@ namespace SchoolManagerApi.Extensions
                         .RequireClaim(CustomClaimTypes.Permission, Permissions.Products.Modify)
                         .RequireClaim(CustomClaimTypes.Permission, Permissions.Products.Delete)
                 );
+                options.AddPolicy(Security.Policies.Store.AccessStorePolicy,
+                    builder => builder
+                        .RequireClaim(CustomClaimTypes.Permission, Permissions.Products.Read)
+                );
                 options.AddPolicy(Security.Policies.RolesManagement.ManageRolesPolicy,
                     builder => builder
                         .RequireClaim(CustomClaimTypes.Permission, Permissions.RolesManagement.Access)

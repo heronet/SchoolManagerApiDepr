@@ -23,19 +23,19 @@ namespace SchoolManagerApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddRole(string name)
+        public async Task<ActionResult> AddRole(AddRoleDTO roleDTO)
         {
-            var roleExists = await _roleManager.RoleExistsAsync(name);
+            var roleExists = await _roleManager.RoleExistsAsync(roleDTO.Name);
             if (!roleExists)
             {
                 IdentityRole newRole;
-                if (name.ToLower() == Constants.Roles.Admin.ToLower())
+                if (roleDTO.Name.ToLower() == Constants.Roles.Admin.ToLower())
                     newRole = new IdentityRole(Constants.Roles.Admin);
-                else if (name.ToLower() == Constants.Roles.Teacher.ToLower())
+                else if (roleDTO.Name.ToLower() == Constants.Roles.Teacher.ToLower())
                     newRole = new IdentityRole(Constants.Roles.Teacher);
-                else if (name.ToLower() == Constants.Roles.StoreKeeper.ToLower())
+                else if (roleDTO.Name.ToLower() == Constants.Roles.StoreKeeper.ToLower())
                     newRole = new IdentityRole(Constants.Roles.StoreKeeper);
-                else if (name.ToLower() == Constants.Roles.Student.ToLower())
+                else if (roleDTO.Name.ToLower() == Constants.Roles.Student.ToLower())
                     newRole = new IdentityRole(Constants.Roles.Student);
                 else
                     return BadRequest("Invalid Role");
@@ -43,7 +43,7 @@ namespace SchoolManagerApi.Controllers
                 if (!roleResult.Succeeded)
                     return BadRequest(roleResult.Errors);
             }
-            if (name.ToLower() == Constants.Roles.Admin.ToLower())
+            if (roleDTO.Name.ToLower() == Constants.Roles.Admin.ToLower())
             {
                 var role = await _roleManager.FindByNameAsync(Constants.Roles.Admin);
 
@@ -57,7 +57,7 @@ namespace SchoolManagerApi.Controllers
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.RolesManagement.Access));
 
             }
-            else if (name.ToLower() == Constants.Roles.StoreKeeper.ToLower())
+            else if (roleDTO.Name.ToLower() == Constants.Roles.StoreKeeper.ToLower())
             {
                 var role = await _roleManager.FindByNameAsync(Constants.Roles.StoreKeeper);
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Read));
@@ -65,9 +65,9 @@ namespace SchoolManagerApi.Controllers
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Modify));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Delete));
             }
-            else if (name.ToLower() == Constants.Roles.Teacher.ToLower())
+            else if (roleDTO.Name.ToLower() == Constants.Roles.Teacher.ToLower())
             {
-                var role = await _roleManager.FindByNameAsync(Constants.Roles.StoreKeeper);
+                var role = await _roleManager.FindByNameAsync(Constants.Roles.Teacher);
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Read));
             }
             return Ok("Role Added Succesfully");
@@ -112,6 +112,12 @@ namespace SchoolManagerApi.Controllers
             var claims = roleCaimObjects.Select(c => c.Value).ToList();
 
             return Ok(new { Claims = claims });
+        }
+        [HttpGet]
+        public async Task<ActionResult<List<string>>> GetRoles()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            return Ok(roles);
         }
         private async Task<List<string>> GetRoleClaims(IdentityRole role)
         {

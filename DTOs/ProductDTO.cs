@@ -1,14 +1,12 @@
 using System;
 
-namespace SchoolManagerApi.Models
+namespace SchoolManagerApi.DTOs
 {
-    public class Product
+    public class ProductDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public Category Category { get; set; }
-        public Guid CategoryId { get; set; }
-        public string CategoryName { get; set; }
+        public string Category { get; set; }
         public double Price { get; set; }
         public string ThumbnailUrl { get; set; }
         public string ThumbnailId { get; set; }

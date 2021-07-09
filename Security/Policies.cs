@@ -5,6 +5,7 @@ namespace SchoolManagerApi.Security
         public static class Store
         {
             public const string ManageStorePolicy = "ManageStorePolicy";
+            public const string AccessStorePolicy = "AccessStorePolicy";
         }
         public static class RolesManagement
         {

@@ -8,8 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SchoolManagerApi.Data;
 using SchoolManagerApi.Models;
-using SchoolManagerApi.Security;
-using SchoolManagerApi.Utils;
 
 namespace SchoolManagerApi.Extensions
 {
