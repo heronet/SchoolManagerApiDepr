@@ -28,7 +28,7 @@ namespace SchoolManagerApi.Controllers
             var productDtos = products.Select(p => GetProductDTO(p));
             return Ok(productDtos);
         }
-        [HttpGet("{id}")]
+        [HttpGet("order/{id}")]
         public async Task<ActionResult> OrderProduct(Guid id)
         {
             var product = await _dbContext.Products.Where(p => p.Id == id).SingleOrDefaultAsync();
@@ -36,6 +36,13 @@ namespace SchoolManagerApi.Controllers
 
             var productDto = GetProductDTO(product);
             return Ok();
+        }
+        [HttpGet("categories")]
+        public async Task<ActionResult> GetCategories()
+        {
+            var categories = await _dbContext.Categories.ToListAsync();
+            var categoryDTOs = categories.Select(c => GetCategoryDTO(c));
+            return Ok(categoryDTOs);
         }
 
 
@@ -60,8 +67,21 @@ namespace SchoolManagerApi.Controllers
             };
             _dbContext.Products.Add(product);
             if (await _dbContext.SaveChangesAsync() > 0)
-                return Ok("Product Added Successfully");
+                return Ok(new { Message = "Product Added Successfully" });
             return BadRequest("Can't add product");
+        }
+        [Authorize(Policy = Security.Policies.Store.ManageStorePolicy)]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProduct(Guid id)
+        {
+            var product = await _dbContext.Products
+                .Where(p => p.Id == id).FirstOrDefaultAsync();
+            if (product == null) return BadRequest("[Error]: Unknown Product");
+
+            _dbContext.Products.Remove(product);
+            if (await _dbContext.SaveChangesAsync() > 0)
+                return Ok(new { Message = "Product Deleted Successfully" });
+            return BadRequest("Can't delete product");
         }
 
         [Authorize(Policy = Security.Policies.Store.ManageStorePolicy)]
@@ -76,13 +96,38 @@ namespace SchoolManagerApi.Controllers
 
             category = new Category
             {
-                Name = categoryDTO.Name.ToLower().Trim()
+                Name = categoryDTO.Name.Trim()
             };
             _dbContext.Categories.Add(category);
-            if (await _dbContext.SaveChangesAsync() > 0)
-                return Ok("Category added successfully");
+            if (await _dbContext.SaveChangesAsync() > 0) // Return all categories
+            {
+                var categories = await _dbContext.Categories.ToListAsync();
+                var categoryDTOs = categories.Select(c => GetCategoryDTO(c));
+                return Ok(categoryDTOs);
+            }
             return BadRequest("Can't add category");
         }
+        [Authorize(Policy = Security.Policies.Store.ManageStorePolicy)]
+        [HttpDelete("category/{id}")]
+        public async Task<ActionResult> DeleteCategory(Guid id)
+        {
+            var category = await _dbContext.Categories
+                .Where(c => c.Id == id)
+                .Include(c => c.Products)
+                .FirstOrDefaultAsync();
+
+            if (category == null) return BadRequest("[Error]: Category Doesn't Exist.");
+
+            _dbContext.Categories.Remove(category);
+            if (await _dbContext.SaveChangesAsync() > 0) // Return all categories
+            {
+                var categories = await _dbContext.Categories.ToListAsync();
+                var categoryDTOs = categories.Select(c => GetCategoryDTO(c));
+                return Ok(categoryDTOs);
+            }
+            return BadRequest("Can't remove category");
+        }
+
         private ProductDTO GetProductDTO(Product product)
         {
             return new ProductDTO
@@ -93,6 +138,14 @@ namespace SchoolManagerApi.Controllers
                 Price = product.Price,
                 ThumbnailUrl = product.ThumbnailUrl,
                 ThumbnailId = product.ThumbnailId
+            };
+        }
+        private CategoryDTO GetCategoryDTO(Category category)
+        {
+            return new CategoryDTO
+            {
+                Name = category.Name,
+                Id = category.Id
             };
         }
     }
