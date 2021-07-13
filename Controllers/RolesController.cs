@@ -43,6 +43,7 @@ namespace SchoolManagerApi.Controllers
                 if (!roleResult.Succeeded)
                     return BadRequest(roleResult.Errors);
             }
+            // Admin Role
             if (roleDTO.Name.ToLower() == Constants.Roles.Admin.ToLower())
             {
                 var role = await _roleManager.FindByNameAsync(Constants.Roles.Admin);
@@ -51,12 +52,14 @@ namespace SchoolManagerApi.Controllers
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Read));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Add));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Modify));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Order));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Delete));
 
                 // Role Management Permissions
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.RolesManagement.Access));
 
             }
+            // StoreKeeper Role
             else if (roleDTO.Name.ToLower() == Constants.Roles.StoreKeeper.ToLower())
             {
                 var role = await _roleManager.FindByNameAsync(Constants.Roles.StoreKeeper);
@@ -65,10 +68,12 @@ namespace SchoolManagerApi.Controllers
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Modify));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Delete));
             }
+            // Teacher Role
             else if (roleDTO.Name.ToLower() == Constants.Roles.Teacher.ToLower())
             {
                 var role = await _roleManager.FindByNameAsync(Constants.Roles.Teacher);
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Read));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, Permissions.Products.Order));
             }
             return Ok("Role Added Succesfully");
         }

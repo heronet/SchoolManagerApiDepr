@@ -21,6 +21,10 @@ namespace SchoolManagerApi.Extensions
                     builder => builder
                         .RequireClaim(CustomClaimTypes.Permission, Permissions.Products.Read)
                 );
+                options.AddPolicy(Security.Policies.Store.OrderFromStorePolicy,
+                    builder => builder
+                        .RequireClaim(CustomClaimTypes.Permission, Permissions.Products.Order)
+                );
                 options.AddPolicy(Security.Policies.RolesManagement.ManageRolesPolicy,
                     builder => builder
                         .RequireClaim(CustomClaimTypes.Permission, Permissions.RolesManagement.Access)
