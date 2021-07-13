@@ -180,12 +180,15 @@ namespace SchoolManagerApi.Controllers
                 .Where(p => p.Id == order.ProductId)
                 .SingleOrDefaultAsync();
 
+            if (product.Stock < orderDTO.DeliveredItemsCount)
+                return BadRequest("Can't deliver more items than available.");
+
             var productPrice = product?.Price ?? 0;
+            product.Stock -= orderDTO.DeliveredItemsCount;
             order.DeliveryMan = orderDTO.DeliveryMan ?? "Unknown";
             order.DeliveredItemsCount = orderDTO.DeliveredItemsCount;
             order.TotalPrice = productPrice * orderDTO.DeliveredItemsCount;
             order.Delivered = true;
-            product.Stock -= orderDTO.DeliveredItemsCount;
 
             _dbContext.Update(order);
             _dbContext.Update(product);
