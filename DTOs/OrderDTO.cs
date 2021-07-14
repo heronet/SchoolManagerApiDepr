@@ -9,6 +9,7 @@ namespace SchoolManagerApi.DTOs
         public bool Delivered { get; set; } = false;
         public long OrderedItemsCount { get; set; } = 0;
         public long DeliveredItemsCount { get; set; } = 0;
+        public long AvailableItemsCount { get; set; } = 0;
         public double TotalPrice { get; set; } = 0;
         public string ProductName { get; set; }
         public string UserId { get; set; }

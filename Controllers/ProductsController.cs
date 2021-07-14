@@ -47,6 +47,7 @@ namespace SchoolManagerApi.Controllers
             var orders = await _dbContext.Orders
                 .Include(o => o.User)
                 .Include(o => o.Product)
+                .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
             var orderDtos = orders.Select(o => GetOrderDto(o));
             return Ok(orderDtos);
@@ -150,7 +151,6 @@ namespace SchoolManagerApi.Controllers
         {
             var user = await _userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             if (user == null) BadRequest("Invalid User");
-
             var product = await _dbContext.Products.Where(p => p.Id == orderDTO.ProductId).SingleOrDefaultAsync();
             if (product == null) return BadRequest("Product doesn't exist");
 
@@ -232,6 +232,7 @@ namespace SchoolManagerApi.Controllers
                 Delivered = order.Delivered,
                 DeliveryMan = order.DeliveryMan,
                 DeliveredItemsCount = order.DeliveredItemsCount,
+                AvailableItemsCount = order.Product?.Stock ?? 0,
                 OrderedItemsCount = order.OrderedItemsCount,
                 TotalPrice = order.TotalPrice
             };
