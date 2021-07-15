@@ -26,11 +26,17 @@ namespace SchoolManagerApi.Controllers
 
         // Readonly Calls
         [HttpGet]
-        public async Task<ActionResult> GetProducts()
+        public async Task<ActionResult> GetProducts(string name = "", int pageSize = 10, int pageNumber = 1)
         {
-            var products = await _dbContext.Products.ToListAsync();
+            var productCount = await _dbContext.Products.Where(p => string.IsNullOrWhiteSpace(name) || p.Name.ToLower().Contains(name.ToLower().Trim())).CountAsync();
+            var products = await _dbContext.Products
+                .Where(p => string.IsNullOrWhiteSpace(name) || p.Name.ToLower().Contains(name.ToLower().Trim()))
+                .OrderBy(p => p.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
             var productDtos = products.Select(p => GetProductDTO(p));
-            return Ok(productDtos);
+            return Ok(new PaginatedResult<ProductDTO> { Data = productDtos, Count = productCount });
         }
 
         [HttpGet("categories")]
