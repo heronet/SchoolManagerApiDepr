@@ -42,15 +42,18 @@ namespace SchoolManagerApi.Controllers
         }
         [Authorize(Policy = Security.Policies.Store.ManageStorePolicy)]
         [HttpGet("orders")]
-        public async Task<ActionResult> GetOrders()
+        public async Task<ActionResult> GetOrders(int pageSize = 10, int pageNumber = 1)
         {
+            var orderCount = await _dbContext.Orders.CountAsync();
             var orders = await _dbContext.Orders
                 .Include(o => o.User)
                 .Include(o => o.Product)
                 .OrderByDescending(o => o.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
             var orderDtos = orders.Select(o => GetOrderDto(o));
-            return Ok(orderDtos);
+            return Ok(new PaginatedResult<OrderDTO> { Data = orderDtos, Count = orderCount });
         }
 
 
@@ -185,7 +188,7 @@ namespace SchoolManagerApi.Controllers
 
             var productPrice = product?.Price ?? 0;
             product.Stock -= orderDTO.DeliveredItemsCount;
-            order.DeliveryMan = orderDTO.DeliveryMan ?? "Unknown";
+            order.DeliveryMan = string.IsNullOrWhiteSpace(orderDTO.DeliveryMan) ? "Unknown" : orderDTO.DeliveryMan;
             order.DeliveredItemsCount = orderDTO.DeliveredItemsCount;
             order.TotalPrice = productPrice * orderDTO.DeliveredItemsCount;
             order.Delivered = true;
